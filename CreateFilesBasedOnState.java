@@ -11,8 +11,7 @@ public class CreateFilesBasedOnState
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
-
-        // *** FIXED PATH — writes in your real folder ***
+        
         Path inStateFile = Paths.get("D:\\COSC\\1437\\Unit 11\\InStateCusts.txt");
         Path outStateFile = Paths.get("D:\\COSC\\1437\\Unit 11\\OutOfStateCusts.txt");
 
@@ -134,3 +133,4 @@ public class CreateFilesBasedOnState
         }
     }
 }
+
