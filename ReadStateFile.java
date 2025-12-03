@@ -12,29 +12,25 @@ public class ReadStateFile
     {
         Scanner kb = new Scanner(System.in);
 
-        // ask user which file they want to use
-        System.out.print("Enter name of file to use >> ");
-        String fileName = "C:\\java\\chapter13\\" + kb.nextLine();
+        System.out.print("Enter file name to use (InStateCusts.txt or OutOfStateCusts.txt) >> ");
+        String fileName = "D:\\COSC\\1437\\Unit 11\\" + kb.nextLine();
 
         Path file = Paths.get(fileName);
 
-        // sample record (helps us calculate record size)
+        System.out.println("DEBUG → Reading from: " + file.toAbsolutePath());
+
         String sample = "000,          ,WI,0000.00" + System.lineSeparator();
         final int REC_SIZE = sample.length();
 
-        // used for random access later
         byte[] data = sample.getBytes();
-
-        // default/empty record indicator
         final String EMPTY = "000";
 
         double totalBalance = 0;
 
-        // show file attributes (created date, size, etc.)
+        // File attributes
         try
         {
             BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
-
             System.out.println("\nFile info:");
             System.out.println("Created: " + attr.creationTime());
             System.out.println("Size:    " + attr.size());
@@ -44,7 +40,7 @@ public class ReadStateFile
             System.out.println("Could not read file attributes.");
         }
 
-        // sequential read — display only real records
+        // Sequential read
         try (BufferedReader reader = Files.newBufferedReader(file))
         {
             System.out.println("\nAll non-default records:\n");
@@ -74,7 +70,7 @@ public class ReadStateFile
             System.out.println("Error reading file.");
         }
 
-        // random access lookup — jump straight to a specific record
+        // Random access
         try
         {
             FileChannel fc = FileChannel.open(file, READ);
@@ -83,13 +79,9 @@ public class ReadStateFile
             System.out.print("\nEnter account number to find >> ");
             int acct = kb.nextInt();
 
-            // jump to the exact record
             fc.position(acct * REC_SIZE);
-
-            // read into buffer
             fc.read(buffer);
 
-            // turn bytes into a readable string
             String record = new String(data);
 
             System.out.println("Record: " + record);
