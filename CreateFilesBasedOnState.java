@@ -12,26 +12,26 @@ public class CreateFilesBasedOnState
     {
         Scanner input = new Scanner(System.in);
 
-        // where the files will be saved
-        Path inStateFile = Paths.get("C:\\java\\chapter13\\InStateCusts.txt");
-        Path outStateFile = Paths.get("C:\\java\\chapter13\\OutOfStateCusts.txt");
+        // *** FIXED PATH — writes in your real folder ***
+        Path inStateFile = Paths.get("D:\\COSC\\1437\\Unit 11\\InStateCusts.txt");
+        Path outStateFile = Paths.get("D:\\COSC\\1437\\Unit 11\\OutOfStateCusts.txt");
 
-        // record formatting rules
-        final String ID_FORMAT = "000";       // 3-digit account number
-        final String NAME_FORMAT = "          "; // 10 spaces for name
+        System.out.println("In-state file = " + inStateFile.toAbsolutePath());
+        System.out.println("Out-of-state file = " + outStateFile.toAbsolutePath());
+
+        final String ID_FORMAT = "000";
+        final String NAME_FORMAT = "          "; 
         final int NAME_LENGTH = NAME_FORMAT.length();
-        final String HOME_STATE = "WI";       // in-state
-        final String BALANCE_FORMAT = "0000.00"; // formatted balance
+        final String HOME_STATE = "WI";
+        final String BALANCE_FORMAT = "0000.00";
         String delimiter = ",";
 
-        // build a sample dummy record to figure out record size
         String s = ID_FORMAT + delimiter + NAME_FORMAT + delimiter +
                 HOME_STATE + delimiter + BALANCE_FORMAT +
                 System.lineSeparator();
 
-        final int REC_SIZE = s.length();   // very important for random access
+        final int REC_SIZE = s.length();
 
-        // these will be used during data entry
         FileChannel fcIn = null;
         FileChannel fcOut = null;
 
@@ -43,74 +43,66 @@ public class CreateFilesBasedOnState
 
         final String QUIT = "999";
 
-        // create both empty files with 1,000 default records
+        // create empty files
         createEmptyFile(inStateFile, s);
         createEmptyFile(outStateFile, s);
 
-        // begin user data-entry section
         try
         {
-            // open both files for writing
             fcIn = (FileChannel) Files.newByteChannel(inStateFile, CREATE, WRITE);
             fcOut = (FileChannel) Files.newByteChannel(outStateFile, CREATE, WRITE);
 
             System.out.print("Enter customer account number >> ");
             idString = input.nextLine();
 
-            // loop until the user enters 999
             while (!idString.equals(QUIT))
             {
                 id = Integer.parseInt(idString);
 
-                // get customer's name
                 System.out.print("Enter name for customer >> ");
                 name = input.nextLine();
 
-                // ensure name is exactly NAME_LENGTH characters
                 StringBuilder sb = new StringBuilder(name);
                 sb.setLength(NAME_LENGTH);
                 name = sb.toString();
 
-                // get customer's state
                 System.out.print("Enter state >> ");
                 state = input.nextLine();
 
-                // get balance
                 System.out.print("Enter balance >> ");
                 balance = input.nextDouble();
-                input.nextLine(); // clear leftover enter key
+                input.nextLine();
 
                 DecimalFormat df = new DecimalFormat(BALANCE_FORMAT);
 
-                // build final record for writing
                 s = idString + delimiter + name + delimiter + state + delimiter +
                         df.format(balance) + System.lineSeparator();
 
-                // convert to bytes
                 byte[] data = s.getBytes();
                 ByteBuffer buffer = ByteBuffer.wrap(data);
 
-                // write record to the correct file
+                // DEBUG — shows exactly where the record goes
                 if (state.equals(HOME_STATE))
                 {
+                    System.out.println("Record = " + s);
+
                     fcIn.position(id * REC_SIZE);
                     fcIn.write(buffer);
                 }
                 else
                 {
+                    System.out.println("Record = " + s);
+
                     fcOut.position(id * REC_SIZE);
                     fcOut.write(buffer);
                 }
 
-                // ask for another
                 System.out.print("Enter next customer account number or 999 to quit >> ");
                 idString = input.nextLine();
             }
 
-            // close channels when done
             fcIn.close();
             fcOut.close();
-
         }
         catch (Exception e)
         {
@@ -118,7 +110,6 @@ public class CreateFilesBasedOnState
         }
     }
 
-    // creates a file with 1,000 default records
     public static void createEmptyFile(Path file, String s)
     {
         final int NUMRECS = 1000;
